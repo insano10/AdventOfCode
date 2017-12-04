@@ -1,4 +1,4 @@
-package com.insano10.aoc
+package com.insano10.aoc.twentyseventeen
 
 class Day1_InverseCapture {
 
