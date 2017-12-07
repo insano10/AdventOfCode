@@ -1,6 +1,6 @@
 package com.insano10.aoc.twentyseventeen
 
-import org.scalatest.{FlatSpec, FunSpec}
+import org.scalatest.FunSpec
 
 class Day1_InverseCaptureTest extends FunSpec {
 
