@@ -14,8 +14,8 @@ class Day3_SpiralMemory {
 
    */
 
-  private def setGridLocation(grid: Array[Array[Long]], x: Int, y: Int, locNum: Long): Unit = {
-    grid(x)(y) = locNum
+  private def setGridValue(grid: Array[Array[Long]], x: Int, y: Int, value: Long): Unit = {
+    grid(x)(y) = value
   }
 
   @tailrec
@@ -37,11 +37,11 @@ class Day3_SpiralMemory {
       val vertStepsToTake = Math.min(targetLocation - currentLocNum, vertSteps).intValue()
 
       (1 to horizStepsToTake).foreach { num =>
-        setGridLocation(grid, currentLoc._1 + (horizDirection * num), currentLoc._2, currentLocNum + 1)
+        setGridValue(grid, currentLoc._1 + (horizDirection * num), currentLoc._2, currentLocNum + 1)
       }
 
       (1 to vertStepsToTake).foreach { num =>
-        setGridLocation(grid, currentLoc._1, currentLoc._2 + (vertDirection * num), currentLocNum + 1)
+        setGridValue(grid, currentLoc._1, currentLoc._2 + (vertDirection * num), currentLocNum + 1)
       }
 
       traverseMemory(
@@ -64,7 +64,7 @@ class Day3_SpiralMemory {
     val grid = Array.ofDim[Long](gridSize, gridSize)
     val startingLoc = (gridSize / 2, gridSize / 2)
 
-    setGridLocation(grid, startingLoc._1, startingLoc._2, 1)
+    setGridValue(grid, startingLoc._1, startingLoc._2, 1)
 
     traverseMemory(
       grid = grid,
@@ -76,6 +76,100 @@ class Day3_SpiralMemory {
       horizDirection = 1,
       vertDirection = 1,
       vectorToLocOne = (0, 0)
+    )
+  }
+
+  private def sumSurroundingValues(grid: Array[Array[Long]],
+                                   currentLoc: (Int, Int)): Long = {
+
+    def getGridValue(x: Int, y: Int): Long = {
+
+
+      if(x < 0 || x > 19 || y < 0 || y > 19) {
+        0
+      } else {
+        grid(x)(y)
+      }
+    }
+
+    getGridValue(currentLoc._1 - 1, currentLoc._2) +
+    getGridValue(currentLoc._1 - 1, currentLoc._2 + 1) +
+    getGridValue(currentLoc._1, currentLoc._2 + 1) +
+    getGridValue(currentLoc._1 + 1, currentLoc._2 + 1) +
+    getGridValue(currentLoc._1 + 1, currentLoc._2) +
+    getGridValue(currentLoc._1 + 1, currentLoc._2 - 1) +
+    getGridValue(currentLoc._1, currentLoc._2 - 1) +
+    getGridValue(currentLoc._1 - 1, currentLoc._2 - 1)
+  }
+
+
+  /*
+
+  147  142  133  122   59
+  304    5    4    2   57
+  330   10    1    1   54
+  351   11   23   25   26
+  362  747  806--->   ...
+
+   */
+
+  @tailrec
+  private def stressTestMemory(grid: Array[Array[Long]],
+                             targetValue: Long,
+                             currentLocValue: Long,
+                             currentLoc: (Int, Int),
+                             currentSideLength: Int,
+                             horizSteps: Int,
+                             vertSteps: Int,
+                             horizDirection: Int,
+                             vertDirection: Int): Long = {
+
+    if (currentLocValue > targetValue) {
+      currentLocValue
+    } else {
+
+      val newCurrentLoc = (currentLoc._1 + (horizDirection * Math.min(1, horizSteps)), currentLoc._2 + (vertDirection * Math.min(1, vertSteps)))
+      val newCurrentLocValue = sumSurroundingValues(grid, newCurrentLoc)
+      val newSideLength = if(horizSteps == 0 && vertSteps == 1) currentSideLength + 1 else currentSideLength
+      val newHorizSteps = if(horizSteps > 1) horizSteps - 1 else if(vertSteps == 1) newSideLength else 0
+      val newVertSteps = if(vertSteps > 1) vertSteps - 1 else if(horizSteps == 1) newSideLength else 0
+      val newHorizDirection = if (newHorizSteps == 0 && vertSteps == 0) -horizDirection else horizDirection
+      val newVertDirection = if (newVertSteps == 0 && horizSteps == 0) -vertDirection else vertDirection
+
+      setGridValue(grid, newCurrentLoc._1, newCurrentLoc._2, newCurrentLocValue)
+
+      stressTestMemory(
+        grid = grid,
+        targetValue = targetValue,
+        currentLocValue = newCurrentLocValue,
+        currentLoc = newCurrentLoc,
+        currentSideLength = newSideLength,
+        horizSteps = newHorizSteps,
+        vertSteps = newVertSteps,
+        horizDirection = newHorizDirection,
+        vertDirection = newVertDirection
+      )
+    }
+  }
+
+  def getStressTestValueLargerThan(num: Long): Long = {
+
+    val gridSize = 20
+    val grid = Array.ofDim[Long](gridSize, gridSize)
+    val startingLoc = (gridSize / 2, gridSize / 2)
+
+    setGridValue(grid, startingLoc._1, startingLoc._2, 1)
+
+    stressTestMemory(
+      grid = grid,
+      targetValue = num,
+      currentLocValue = 1,
+      currentLoc = startingLoc,
+      currentSideLength = 1,
+      horizSteps = 1,
+      vertSteps = 0,
+      horizDirection = 1,
+      vertDirection = 1
     )
   }
 }
