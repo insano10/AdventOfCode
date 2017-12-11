@@ -1,7 +1,5 @@
 package com.insano10.aoc.twentyseventeen
 
-import java.io.File
-
 import org.scalatest.FunSpec
 
 import scala.io.Source
@@ -26,19 +24,11 @@ class Day4_HighEntropyPassphrasesTest extends FunSpec {
 
     it("should solve input question") {
 
-      val input = Source.fromFile("src/test/resources/Day4_Part1_Input.txt").getLines().toList
+      val input = Source.fromFile("src/test/resources/Day4_Input.txt").getLines().toList
 
       assert(solution.countValidPassphrases(input) === 466)
     }
   }
-
-  /*
-  abcde fghij is a valid passphrase.
-abcde xyz ecdab is not valid - the letters from the third word can be rearranged to form the first word.
-a ab abc abd abf abj is a valid passphrase, because all letters need to be used when forming another word.
-iiii oiii ooii oooi oooo is valid.
-oiii ioii iioi iiio is not valid - any of these words can be rearranged to form any other word.
-   */
 
   describe("Part 2") {
 
@@ -64,7 +54,7 @@ oiii ioii iioi iiio is not valid - any of these words can be rearranged to form 
 
     it("should solve input question") {
 
-      val input = Source.fromFile("src/test/resources/Day4_Part1_Input.txt").getLines().toList
+      val input = Source.fromFile("src/test/resources/Day4_Input.txt").getLines().toList
 
       assert(solution.countValidPassphrasesPart2(input) === 251)
     }
