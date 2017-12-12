@@ -4,6 +4,9 @@ import scala.annotation.tailrec
 
 class Day6_MemoryReallocation {
 
+  type TotalMovesAndLoopSize = (Int, Int)
+  type BankDistributionAndMoveSeen = Map[String, Int]
+
   /*
 
   Take the bank with the highest number of blocks and spread them round robin over the other banks
@@ -16,11 +19,11 @@ class Day6_MemoryReallocation {
   1, 3, 4, 1
   2, 4, 1, 2
    */
-  def countMovesTillLoop(initialMemoryBlocks: Array[Int]): Int = {
+  def countMovesTillLoop(initialMemoryBlocks: Array[Int]): TotalMovesAndLoopSize = {
 
     def getBankToRedistribute(banks: Array[Int]) = banks.zipWithIndex.maxBy(_._1)._2
 
-    def redistrubute(banks: Array[Int], bankIdx: Int): Unit = {
+    def redistribute(banks: Array[Int], bankIdx: Int): Unit = {
 
       val totalMemory = banks(bankIdx)
       banks(bankIdx) = 0
@@ -32,19 +35,19 @@ class Day6_MemoryReallocation {
     }
 
     @tailrec
-    def distributeTillLoop(banks: Array[Int], seenDistributions: Set[Array[Int]], totalMoves: Int): Int = {
+    def distributeTillLoop(banks: Array[Int], seenDistributions: BankDistributionAndMoveSeen, totalMoves: Int): TotalMovesAndLoopSize = {
 
-      val currentBankDistribution = banks.clone()
+      val currentBankDistribution = banks.mkString("")
 
-      if(seenDistributions.exists(_.deep == currentBankDistribution.deep)) {
-        totalMoves
+      if(seenDistributions.contains(currentBankDistribution)) {
+        (totalMoves, totalMoves - seenDistributions(currentBankDistribution))
       } else {
-        redistrubute(banks, getBankToRedistribute(banks))
-        distributeTillLoop(banks, seenDistributions ++ Set(currentBankDistribution), totalMoves + 1)
+        redistribute(banks, getBankToRedistribute(banks))
+        distributeTillLoop(banks, seenDistributions ++ Map(currentBankDistribution -> totalMoves), totalMoves + 1)
       }
     }
 
-    distributeTillLoop(initialMemoryBlocks, Set(), 0)
+    distributeTillLoop(initialMemoryBlocks, Map(), 0)
   }
 
 }
