@@ -4,6 +4,29 @@ import scala.annotation.tailrec
 
 class Day5_AMazeOfTwistyTrampolines {
 
+
+  @tailrec
+  private def exitMaze(jumpList: Array[Int], maxIdx: Int, idx: Int, totalSteps: Int, jumpFn: Int => Int): Int = {
+
+    if(idx > maxIdx) {
+      totalSteps
+    } else {
+
+      val currentJump = jumpList(idx)
+      val updatedOffset = jumpFn(currentJump)
+
+      jumpList(idx) = updatedOffset
+
+      exitMaze(
+        jumpList = jumpList,
+        maxIdx = maxIdx,
+        idx = idx + currentJump,
+        totalSteps = totalSteps + 1,
+        jumpFn = jumpFn
+      )
+    }
+  }
+
   /*
   Follow the jumps in the list to instructions ahead and behind you
   Increment the current instruction value after execution
@@ -17,54 +40,17 @@ class Day5_AMazeOfTwistyTrampolines {
   2  5  0  1  -2  - jump 4 steps forward, escaping the maze.
 
    */
-  def countStepsToEscapeMaze(jumpList: List[Int]): Int = {
+  def countStepsToEscapeMaze(jumpList: Array[Int]): Int = {
 
-    val maxIdx = jumpList.length - 1
-
-    @tailrec
-    def doJump(jumpList: List[Int], idx: Int, totalSteps: Int): Int = {
-
-      if(idx > maxIdx) {
-        totalSteps
-      } else {
-
-        val currentJump = jumpList(idx)
-        doJump(
-          jumpList = jumpList.take(idx) ++ List(currentJump + 1) ++ jumpList.drop(idx + 1),
-          idx = idx + currentJump,
-          totalSteps = totalSteps + 1
-        )
-      }
-    }
-
-    doJump(jumpList, 0, 0)
+    exitMaze(jumpList, jumpList.length - 1, 0, 0, _ + 1)
   }
 
   /*
     Same as above but now after each jump, if the offset was three or more, instead decrease it by 1.
      Otherwise, increase it by 1 as before.
    */
-  def countStepsToEscapeMazePart2(jumpList: List[Int]): Long = {
+  def countStepsToEscapeMazePart2(jumpList: Array[Int]): Long = {
 
-    val maxIdx = jumpList.length - 1
-
-    @tailrec
-    def doJump(jumpList: List[Int], idx: Int, totalSteps: Long): Long = {
-
-      if(idx > maxIdx) {
-        totalSteps
-      } else {
-
-        val currentJump = jumpList(idx)
-        val updatedOffset = if(currentJump >= 3) currentJump - 1 else currentJump + 1
-        doJump(
-          jumpList = jumpList.take(idx) ++ List(updatedOffset) ++ jumpList.drop(idx + 1),
-          idx = idx + currentJump,
-          totalSteps = totalSteps + 1
-        )
-      }
-    }
-
-    doJump(jumpList, 0, 0)
+    exitMaze(jumpList, jumpList.length - 1, 0, 0, currentJump => if(currentJump >= 3) currentJump - 1 else currentJump + 1)
   }
 }
