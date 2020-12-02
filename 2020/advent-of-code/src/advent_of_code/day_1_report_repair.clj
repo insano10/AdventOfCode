@@ -1,17 +1,12 @@
 (ns advent-of-code.day-1-report-repair
-  (:require [clojure.data.csv :as csv]
-            [clojure.java.io :as io]))
-
-(defn- read-csv [input-file]
-  (with-open [reader (io/reader input-file)]
-    (doall (csv/read-csv reader))))
+  (:require [advent-of-code.utils :as utils]))
 
 ;; (day1/solve-part1 "resources/day1_example.csv")
 ;; strategy:
 ;; sort numbers and for each number in order find the next highest number that when
 ;; added does not exceed 2020. This avoids having to check all permutations of pairs
 (defn solve-part1 [csv-filename]
-  (let [contents (->> (read-csv csv-filename)
+  (let [contents (->> (utils/read-csv csv-filename)
                       flatten
                       (map #(Integer/parseInt %))
                       sort)]
@@ -40,7 +35,7 @@
 ;; make a set of all numbers, find all subsets containing 3 elements
 ;; then check each set to see if it totals 2020
 (defn solve-part2 [csv-filename]
-  (let [matching-set (->> (read-csv csv-filename)
+  (let [matching-set (->> (utils/read-csv csv-filename)
                           flatten
                           set
                           (map #(Integer/parseInt %))
