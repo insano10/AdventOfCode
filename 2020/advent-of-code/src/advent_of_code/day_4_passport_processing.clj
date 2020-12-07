@@ -4,33 +4,65 @@
             [clojure.spec.alpha :as s]))
 
 
-;byr (Birth Year)
-;iyr (Issue Year)
-;eyr (Expiration Year)
-;hgt (Height)
-;hcl (Hair Color)
-;ecl (Eye Color)
-;pid (Passport ID)
-;cid (Country ID) - optional
-
 (defn- non-blank-str [str] (complement str/blank?))
-(s/def ::byr non-blank-str)
-(s/def ::iyr non-blank-str)
-(s/def ::eyr non-blank-str)
-(s/def ::hgt non-blank-str)
-(s/def ::hcl non-blank-str)
-(s/def ::ecl non-blank-str)
-(s/def ::pid non-blank-str)
-(s/def ::cid non-blank-str)
-(s/def ::passport
-  (s/keys :req-un [::byr
-                   ::iyr
-                   ::eyr
-                   ::hgt
-                   ::hcl
-                   ::ecl
-                   ::pid]
-          :opt-un [::cid]))
+(defn- int-str? [str] (try (Integer/parseInt str)
+                           true
+                           (catch Exception e
+                             false)))
+(s/def :part1/byr non-blank-str)
+(s/def :part1/iyr non-blank-str)
+(s/def :part1/eyr non-blank-str)
+(s/def :part1/hgt non-blank-str)
+(s/def :part1/hcl non-blank-str)
+(s/def :part1/ecl non-blank-str)
+(s/def :part1/pid non-blank-str)
+(s/def :part1/cid non-blank-str)
+
+(s/def :part2/byr #(and (int-str? %)
+                        (let [nums (Integer/parseInt %)]
+                          (and (> nums 1919)
+                               (< nums 2003)))))
+(s/def :part2/iyr #(and (int-str? %)
+                        (let [nums (Integer/parseInt %)]
+                          (and (> nums 2009)
+                               (< nums 2021)))))
+(s/def :part2/eyr #(and (int-str? %)
+                        (let [nums (Integer/parseInt %)]
+                          (and (> nums 2019)
+                               (< nums 2031)))))
+(s/def :part2/hgt #(let [unit (str/join (take-last 2 %))
+                         num-str (str/join (drop-last 2 %))]
+                    (and (int-str? num-str)
+                         (let [num (Integer/parseInt num-str)]
+                           (if (= "cm" unit)
+                             (and (> num 149)
+                                  (< num 194))
+                             (and (> num 58)
+                                  (< num 77)))))))
+(s/def :part2/hcl #(re-matches #"#[0-9a-f]{6}" %))
+(s/def :part2/ecl #{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"})
+(s/def :part2/pid #(re-matches #"[0-9]{9}" %))
+(s/def :part2/cid non-blank-str)
+
+(s/def :part1/passport
+  (s/keys :req-un [:part1/byr
+                   :part1/iyr
+                   :part1/eyr
+                   :part1/hgt
+                   :part1/hcl
+                   :part1/ecl
+                   :part1/pid]
+          :opt-un [:part1/cid]))
+
+(s/def :part2/passport
+  (s/keys :req-un [:part2/byr
+                   :part2/iyr
+                   :part2/eyr
+                   :part2/hgt
+                   :part2/hcl
+                   :part2/ecl
+                   :part2/pid]
+          :opt-un [:part2/cid]))
 
 (defn- ->kv-pair [passport-field]
   (let [kv-array (str/split passport-field #":")]
@@ -63,5 +95,13 @@
   (let [valid-passports (->> (utils/read-csv csv-filename)
                              flatten
                              ->passports
-                             (filter #(s/valid? ::passport %)))]
+                             (filter #(s/valid? :part1/passport %)))]
+    (count valid-passports)))
+
+;; (day4/solve-part2 "resources/day4_example.csv")
+(defn solve-part2 [csv-filename]
+  (let [valid-passports (->> (utils/read-csv csv-filename)
+                             flatten
+                             ->passports
+                             (filter #(s/valid? :part2/passport %)))]
     (count valid-passports)))
